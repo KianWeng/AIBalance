@@ -20,5 +20,5 @@ enum AppConstants {
     }
 
     /// 默认服务地址
-    static let defaultServerURL = "http://192.168.3.118:8787"
+    static let defaultServerURL = "http://zephyr-s.online:3000"
 }

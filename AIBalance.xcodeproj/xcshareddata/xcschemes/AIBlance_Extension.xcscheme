@@ -76,12 +76,21 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
+            BlueprintIdentifier = "85A11A362FD3C4A7006F0BE2"
+            BuildableName = "AIBlance_Extension.appex"
+            BlueprintName = "AIBlance_Extension"
+            ReferencedContainer = "container:AIBalance.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
             BlueprintIdentifier = "85A11A082FD3C3DB006F0BE2"
             BuildableName = "AIBalance Watch App.app"
             BlueprintName = "AIBalance Watch App"
             ReferencedContainer = "container:AIBalance.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
