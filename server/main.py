@@ -136,16 +136,17 @@ if __name__ == "__main__":
     print()
 
     # 启动 Flask 服务
-    print(f"服务已启动: http://localhost:{Config.SERVER_PORT}")
-    print(f"  余额数据: http://localhost:{Config.SERVER_PORT}/api/balances")
-    print(f"  强制刷新: http://localhost:{Config.SERVER_PORT}/api/refresh")
-    print(f"  健康检查: http://localhost:{Config.SERVER_PORT}/api/health")
+    protocol = "https" if Config.use_ssl else "http"
+    print(f"服务已启动: {protocol}://0.0.0.0:{Config.SERVER_PORT}")
+    print(f"  余额数据: {protocol}://0.0.0.0:{Config.SERVER_PORT}/api/balances")
+    print(f"  强制刷新: {protocol}://0.0.0.0:{Config.SERVER_PORT}/api/refresh")
+    print(f"  健康检查: {protocol}://0.0.0.0:{Config.SERVER_PORT}/api/health")
     print()
     print("按 Ctrl+C 停止服务")
     print("-" * 50)
 
     try:
-        app.run(host="0.0.0.0", port=Config.SERVER_PORT, debug=False)
+        app.run(host="0.0.0.0", port=Config.SERVER_PORT, debug=False, **Config.ssl_context)
     except KeyboardInterrupt:
         scheduler.shutdown()
         print("\n服务已停止")

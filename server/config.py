@@ -44,6 +44,25 @@ class Config:
     # DeepSeek
     DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
 
+    # SSL 配置（可选）
+    SSL_CERT: str = os.getenv("SSL_CERT", "")
+    SSL_KEY: str = os.getenv("SSL_KEY", "")
+
+    @property
+    def use_ssl(self) -> bool:
+        """检查是否配置了 SSL"""
+        return bool(self.SSL_CERT and self.SSL_KEY)
+
+    @property
+    def ssl_context(self) -> dict:
+        """获取 SSL 配置"""
+        if not self.use_ssl:
+            return {}
+        return {
+            "certfile": self.SSL_CERT,
+            "keyfile": self.SSL_KEY,
+        }
+
     # 服务配置
     REFRESH_INTERVAL: int = int(os.getenv("REFRESH_INTERVAL", "300"))
     SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8787"))
