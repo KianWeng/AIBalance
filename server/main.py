@@ -146,7 +146,8 @@ if __name__ == "__main__":
     print("-" * 50)
 
     try:
-        app.run(host="0.0.0.0", port=Config.SERVER_PORT, debug=False, **Config.ssl_context)
+        ssl_kwargs = Config().ssl_context
+        app.run(host="0.0.0.0", port=Config.SERVER_PORT, debug=False, **ssl_kwargs)
     except KeyboardInterrupt:
         scheduler.shutdown()
         print("\n服务已停止")
