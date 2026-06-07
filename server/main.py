@@ -14,7 +14,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from config import Config
-from fetchers import AnthropicFetcher, OpenAIFetcher, CursorFetcher, GoogleFetcher
+from fetchers import AnthropicFetcher, OpenAIFetcher, CursorFetcher, GoogleFetcher, DeepSeekFetcher
 
 app = Flask(__name__)
 CORS(app)  # 允许来自局域网的请求
@@ -34,6 +34,7 @@ _fetchers = [
     OpenAIFetcher(),
     CursorFetcher(),
     GoogleFetcher(),
+    DeepSeekFetcher(),
 ]
 
 

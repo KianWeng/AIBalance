@@ -16,7 +16,7 @@ import AppIntents
 // MARK: - 提供商选择 (AppIntent)
 
 enum AIProvider: String, AppEnum {
-    case anthropic, openai, cursor, google
+    case anthropic, openai, cursor, google, deepseek
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "AI 提供商"
 
@@ -25,6 +25,7 @@ enum AIProvider: String, AppEnum {
         .openai: "OpenAI",
         .cursor: "Cursor",
         .google: "Gemini",
+        .deepseek: "DeepSeek",
     ]
 }
 
@@ -76,11 +77,14 @@ struct ComplicationProvider: AppIntentTimelineProvider {
         openai.provider = .openai
         let google = ProviderIntent()
         google.provider = .google
+        let deepseek = ProviderIntent()
+        deepseek.provider = .deepseek
         return [
             AppIntentRecommendation(intent: cursor, description: "Cursor 用量"),
             AppIntentRecommendation(intent: anthropic, description: "Claude 用量"),
             AppIntentRecommendation(intent: openai, description: "OpenAI 用量"),
             AppIntentRecommendation(intent: google, description: "Gemini 用量"),
+            AppIntentRecommendation(intent: deepseek, description: "DeepSeek 用量"),
         ]
     }
 
@@ -105,24 +109,35 @@ struct ComplicationProvider: AppIntentTimelineProvider {
 
     // 数据加载: App Group → 标准 UserDefaults → 直接从服务器获取
     private func loadBalances() async -> [BalanceItem] {
-        // 1) App Group 缓存
-        if let items = loadFromDefaults(UserDefaults(suiteName: AppConstants.appGroupID)) {
+        // 1) App Group 缓存（检查是否过期）
+        if let items = loadFromDefaults(UserDefaults(suiteName: AppConstants.appGroupID), checkExpiry: true) {
             return items
         }
-        // 2) 标准 UserDefaults
-        if let items = loadFromDefaults(UserDefaults.standard) {
+        // 2) 标准 UserDefaults（检查是否过期）
+        if let items = loadFromDefaults(UserDefaults.standard, checkExpiry: true) {
             return items
         }
         // 3) 直接从 Flask 服务器获取
         return await fetchFromServer()
     }
 
-    private func loadFromDefaults(_ defaults: UserDefaults?) -> [BalanceItem]? {
+    private func loadFromDefaults(_ defaults: UserDefaults?, checkExpiry: Bool = false) -> [BalanceItem]? {
         guard let defaults = defaults,
               let data = defaults.data(forKey: AppConstants.StorageKeys.cachedBalances),
               let items = try? JSONDecoder().decode([BalanceItem].self, from: data),
               !items.isEmpty
         else { return nil }
+        
+        // 检查缓存是否过期（超过 15 分钟）
+        if checkExpiry {
+            if let lastUpdated = defaults.object(forKey: AppConstants.StorageKeys.lastUpdated) as? Date {
+                let age = Date().timeIntervalSince(lastUpdated)
+                if age > 15 * 60 { // 15 分钟过期
+                    print("缓存已过期 (\(age/60) 分钟前)，跳过缓存")
+                    return nil
+                }
+            }
+        }
         return items
     }
 
@@ -199,7 +214,7 @@ struct ComplicationView: View {
             VStack(spacing: 0) {
                 if let item = entry.item {
                     // 已用量
-                    Text(formatShort(item.used_amount))
+                    Text(formatShort(item.used_amount, currency: item.currency))
                         .font(.system(size: 12, weight: .bold, design: .rounded))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
@@ -211,7 +226,7 @@ struct ComplicationView: View {
                             .frame(width: 20, height: 0.5)
                             .padding(.vertical, 1)
                         // 总额
-                        Text(formatShort(total))
+                        Text(formatShort(total, currency: item.currency))
                             .font(.system(size: 9, design: .rounded))
                             .foregroundColor(.secondary)
                             .minimumScaleFactor(0.6)
@@ -256,10 +271,10 @@ struct ComplicationView: View {
 
                     // 用量 / 总额
                     if let total = item.total_quota, total > 0 {
-                        Text("\(formatShort(item.used_amount)) / \(formatShort(total))")
+                        Text("\(formatShort(item.used_amount, currency: item.currency)) / \(formatShort(total, currency: item.currency))")
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                     } else {
-                        Text(formatShort(item.used_amount))
+                        Text(formatShort(item.used_amount, currency: item.currency))
                             .font(.system(size: 11, weight: .medium, design: .rounded))
                     }
                 }
@@ -283,7 +298,7 @@ struct ComplicationView: View {
                         .foregroundColor(progressColor(item.usage_percentage))
 
                     if let total = item.total_quota, total > 0, let remaining = item.remaining {
-                        Text("剩余 \(formatShort(remaining))")
+                        Text("剩余 \(formatShort(remaining, currency: item.currency))")
                             .font(.system(size: 9))
                             .foregroundColor(.secondary)
                     }
@@ -344,14 +359,21 @@ struct ComplicationView: View {
 
     // MARK: - 格式化
 
-    private func formatShort(_ amount: Double) -> String {
+    private func formatShort(_ amount: Double, currency: String = "USD") -> String {
+        let symbol: String
+        if currency == "CNY" {
+            symbol = "¥"
+        } else {
+            symbol = "$"
+        }
+        
         if amount >= 1000 {
-            return "$\(String(format: "%.0f", amount))"
+            return "\(symbol)\(String(format: "%.0f", amount))"
         }
         if amount >= 100 {
-            return "$\(String(format: "%.1f", amount))"
+            return "\(symbol)\(String(format: "%.1f", amount))"
         }
-        return "$\(String(format: "%.2f", amount))"
+        return "\(symbol)\(String(format: "%.2f", amount))"
     }
 }
 

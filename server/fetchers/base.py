@@ -66,6 +66,7 @@ class BaseFetcher(ABC):
         total_quota: Optional[float],
         used_amount: float,
         billing_period: str = "monthly",
+        currency: str = "USD",
     ) -> BalanceInfo:
         """构造正常的 BalanceInfo"""
         remaining = None
@@ -81,7 +82,7 @@ class BaseFetcher(ABC):
             total_quota=total_quota,
             used_amount=round(used_amount, 2),
             remaining=round(remaining, 2) if remaining is not None else None,
-            currency="USD",
+            currency=currency,
             billing_period=billing_period,
             usage_percentage=round(usage_pct, 1),
             last_updated=datetime.now().isoformat(),

@@ -9,11 +9,13 @@ API 端点：api2.cursor.sh (gRPC-web)
   - DashboardService/GetAggregatedUsageEvents → 用量汇总 (tokens / cost)
 """
 
+from __future__ import annotations
 import sqlite3
 import struct
 import requests
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 from .base import BaseFetcher, BalanceInfo
 from config import Config
 
@@ -162,7 +164,7 @@ class CursorFetcher(BaseFetcher):
         """将 protobuf fixed64 (int) 转换为 double"""
         return struct.unpack("<d", struct.pack("<Q", raw_int))[0]
 
-    def _grpc_request(self, service: str, method: str, payload: bytes = b"") -> dict | None:
+    def _grpc_request(self, service: str, method: str, payload: bytes = b"") -> Optional[dict]:
         """发送 gRPC-web 请求并返回解码后的 protobuf dict
 
         Returns:

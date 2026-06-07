@@ -41,6 +41,9 @@ class Config:
     # Google
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
+    # DeepSeek
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
+
     # 服务配置
     REFRESH_INTERVAL: int = int(os.getenv("REFRESH_INTERVAL", "300"))
     SERVER_PORT: int = int(os.getenv("SERVER_PORT", "8787"))

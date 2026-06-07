@@ -57,6 +57,15 @@ struct BalanceItem: Codable, Identifiable {
             return "\(Int(used_amount)) 次"
         }
 
+        if currency == "CNY" {
+            if let total = total_quota, total > 0 {
+                return "¥\(String(format: "%.2f", used_amount)) / ¥\(String(format: "%.0f", total))"
+            }
+            if used_amount > 0 {
+                return "¥\(String(format: "%.2f", used_amount))"
+            }
+        }
+
         // 美元计费
         if let total = total_quota, total > 0 {
             return "$\(String(format: "%.2f", used_amount)) / $\(String(format: "%.0f", total))"
@@ -74,6 +83,14 @@ struct BalanceItem: Codable, Identifiable {
         if currency == "requests" {
             return "\(Int(used_amount))"
         }
+        if currency == "CNY" {
+            if let remaining = remaining {
+                return "¥\(String(format: "%.0f", remaining))"
+            }
+            if used_amount > 0 {
+                return "¥\(String(format: "%.2f", used_amount))"
+            }
+        }
         if let remaining = remaining {
             return "$\(String(format: "%.0f", remaining))"
         }
@@ -90,6 +107,7 @@ struct BalanceItem: Codable, Identifiable {
         case "openai": return "sparkles"
         case "cursor": return "chevron.left.forwardslash.chevron.right"
         case "google": return "g.circle"
+        case "deepseek": return "fish"
         default: return "circle.dashed"
         }
     }
@@ -101,6 +119,7 @@ struct BalanceItem: Codable, Identifiable {
         case "openai": return "OpenAIGreen"
         case "cursor": return "CursorBlue"
         case "google": return "GoogleBlue"
+        case "deepseek": return "DeepSeekBlue"
         default: return "AccentColor"
         }
     }
