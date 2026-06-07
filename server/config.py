@@ -1,6 +1,7 @@
 """配置管理 - 从 .env 文件加载 API Key 和 Cookie"""
 
 import os
+import ssl
 import sqlite3
 from pathlib import Path
 from dotenv import load_dotenv
@@ -54,14 +55,13 @@ class Config:
         return bool(self.SSL_CERT and self.SSL_KEY)
 
     @property
-    def ssl_context(self) -> dict:
-        """获取 SSL 配置"""
+    def ssl_context(self):
+        """获取 ssl.SSLContext 对象，未配置时返回 None"""
         if not self.use_ssl:
-            return {}
-        return {
-            "certfile": self.SSL_CERT,
-            "keyfile": self.SSL_KEY,
-        }
+            return None
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(certfile=self.SSL_CERT, keyfile=self.SSL_KEY)
+        return ctx
 
     # 服务配置
     REFRESH_INTERVAL: int = int(os.getenv("REFRESH_INTERVAL", "300"))
