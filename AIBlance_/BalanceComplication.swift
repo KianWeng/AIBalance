@@ -96,7 +96,7 @@ struct ComplicationProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: ProviderIntent, in context: Context) async -> Timeline<BalanceWidgetEntry> {
         let entry = await makeEntry(for: configuration)
-        let next = Calendar.current.date(byAdding: .minute, value: 30, to: Date())!
+        let next = Calendar.current.date(byAdding: .minute, value: 5, to: Date())!
         return Timeline(entries: [entry], policy: .after(next))
     }
 
